@@ -1,3 +1,8 @@
-Remove-Item behaviors/check/skill.mcs.yml
-git checkout -- behaviors/check/skill.mcs.yml
-git ls-files --eol -- behaviors/check/skill.mcs.yml
+$p = "behaviors/check/skill.mcs.yml"
+(Get-Content $p -Raw) -replace "(?<!\r)\n", "`r`n" | Set-Content $p -NoNewline -Encoding utf8
+
+
+git ls-files --eol -- "*skill.mcs.yml"
+
+git status
+

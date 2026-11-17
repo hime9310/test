@@ -1,43 +1,38 @@
-'''mermaid 
-flowchart TB
-  U["利用者 (CMS/CI)<br/>Teams"]
-  OPS["ナレッジ運用チーム"]
+**①について**
 
-  subgraph CS["Copilot Studio (New experience)"]
-    FAQ["<b>FAQ Agent</b><br/>スキル: answer-format / inquiry-log"]
-    IMP["<b>ナレッジ改善 Agent</b><br/>スキル: log-analysis"]
-    T1["ツール<br/>OneNote_ページ取得"]
-    T2["ツール<br/>問い合わせログ_記録"]
-    T3["ツール<br/>問い合わせログ_取得"]
-  end
+ご認識のとおりです。登録したフォルダの配下は、サブフォルダの中のファイルまで含めてすべて検索対象になります。公式には「登録したフォルダまたはサイトの URL と、そのサブフォルダだけを検索する。親フォルダ・隣のフォルダ・他のサイトは、別途登録しない限り参照しない」と書かれています。
 
-  subgraph DATA["データソース"]
-    SPO[("SharePoint ナレッジ公開<br/>事前相談 / 利用申請 / 共通 / Eng")]
-    ON[("OneNote<br/>業務カテゴリ別セクション")]
-    LOG[("SharePoint List<br/>問い合わせログ")]
-  end
+制限は次のとおりです。
 
-  U -->|"1. 質問"| FAQ
-  FAQ -->|"5. 根拠リンク付きの回答"| U
-  FAQ -->|"2. ナレッジ検索"| SPO
-  FAQ -->|"3. 足りないときだけ"| T1
-  T1 -->|"セクションを読む"| ON
-  FAQ -->|"4. 回答ごとに1回"| T2
-  T2 -->|"1行追加"| LOG
+| 項目 | 制限 |
+|---|---|
+| 登録できる SharePoint の URL 数 | 1 Agent あたり 25 件まで（生成オーケストレーション使用時） |
+| ナレッジ全体の数 | 1 Agent あたり 500 件まで（全種類の合計） |
+| 読める形式 | Word（DOC/DOCX）、PowerPoint（PPT/PPTX）、PDF、モダンページ |
+| ファイルサイズ | 作成者と同じテナントに M365 Copilot ライセンスが無い場合は 7MB 未満。ライセンスがあり、テナント グラフ グラウンディングを ON にすると 200MB まで |
+| 配下のファイル数・サブフォルダの数・階層の深さ | この登録方式（URL 登録）については、公式に数値の記載がありません |
 
-  OPS -->|"期間を指定"| IMP
-  IMP --> T3
-  T3 -->|"ログを読む"| LOG
-  IMP -->|"改善の提案<br/>(不足 / 修正 / 重複)"| OPS
-  OPS -.->|"人が確認して修正"| SPO
-  OPS -.->|"人が確認して修正"| ON
+「1,000 ファイル・50 フォルダ・10 階層まで」という数値も公式にありますが、これはファイルを Dataverse に同期する別の登録方式の制限です。社内で Dataverse が使えないため、今回の方式には当てはまりません。
 
-  classDef agent fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
-  classDef tool fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
-  classDef data fill:#fff8e1,stroke:#b8860b,color:#5d4200;
-  classDef person fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c;
-  class FAQ,IMP agent;
-  class T1,T2,T3 tool;
-  class SPO,ON,LOG data;
-  class U,OPS person;
-'''
+**②について**
+
+同居は可能です。ただし、登録の単位を親フォルダではなくサブフォルダにする必要があります。
+
+```
+業務カテゴリA/
+├─ 公開/      ← この URL を登録（Agent が読む）
+└─ 非公開/    ← 登録しない（Agent は読まない）
+```
+
+- **親フォルダは登録しない**：「業務カテゴリA」を登録すると配下が全部対象になり、特定のサブフォルダだけを除外する設定はありません。
+- **隣のフォルダは読まれない**：「公開」だけを登録すれば、「非公開」は上記の公式の記載どおり参照されません。
+- **URL 数に注意**：カテゴリごとに「公開」を1件ずつ登録するので、カテゴリ数がそのまま 25 件の枠を使います。
+
+補足が2点あります。
+
+- **権限では代用できません**：Agent は利用者本人がアクセスできる内容だけを返すので、「非公開」の権限を絞れば、権限の無い人には出ません。ただ、権限を持つ人が質問すると回答に使われます。「Agent に読ませない」目的なら、登録対象から外す方が確実です。
+- **同じフォルダ内でのファイル単位の出し分けは難しいです**：公式には更新日・タイトル・作成者などで絞るフィルター（詳細設定）の記載がありますが、フォルダ単位の除外には使えず、運用も複雑になります。サブフォルダで分ける方法をおすすめします。
+
+Sources:
+- [Quotas and limits - Microsoft Copilot Studio](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)
+- [Add SharePoint as a knowledge source](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-sharepoint)

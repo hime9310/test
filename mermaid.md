@@ -1,46 +1,24 @@
-SharePoint のフォルダ構成に関わる制限を、4項目で整理しました。
 
-**前提**：公式の制限ページは、対象を「standard harness agents and classic chatbots」としています。New UI（GitHub Copilot ハーネス）に同じ数値が適用されるか、違いがあるかは、現時点で不明です。下の数値は公式に載っているもので、New UI への適用は MS に確認が必要です。
 
-### 1. URL 数
+ご丁寧にご回答いただき、ありがとうございます。
+ご提案を受けて整理したところ、前提の共有が不足していましたので、補足させてください。
 
-- **制限内容**：SharePoint の URL は、1 Agent あたり 25 件まで。数えるのは登録した URL の数で、配下のファイル数ではありません。
-- **補足（公式記載）**：
-  - "Each agent can have a maximum of 25 SharePoint site URLs when the agent is using generative orchestration."
-  - "The agent searches only the folder or site URL you register, and its subfolders. It never accesses parent folders, sibling folders, or other sites unless you register them separately."
-- **公式URL**：[Quotas and limits](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas) / [Add SharePoint as a knowledge source](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-add-sharepoint)
-- **対処方法**：登録は業務カテゴリ単位にして、サブフォルダは個別に登録しない（配下は自動で対象）。「公開／非公開」を分ける場合も、カテゴリごとに「公開」1件だけを登録する。カテゴリ数は 25 未満に収める。
+**前提**
+- 参照先は GitHub だけではなく、ServiceNow の KBA、SharePoint、OneNote も同時に参照します。
+- 利用者には、エンジニアでない方も含まれます。
+- GitHub Copilot のライセンスは今後 CMS/CI の全員分を申請する方向ですが、馴染みのない方もおり、将来は CMS/CI 以外への公開も考えています。
 
-### 2. ナレッジ数
+そのため、全体の入口は Teams または M365 Copilot（Copilot Studio のエージェント）とし、GitHub Copilot はエンジニア向けに併用する方針です。独自環境の払い出しは、期間を考えて今回は見送ります。
 
-- **制限内容**：ナレッジは、全種類の合計で 1 Agent あたり 500 件まで。フォルダ1つの登録は1件と数えます。
-- **補足（公式記載）**："Knowledge sources per agent: 500 across all types"
-  - SharePoint の 25 件がこの 500 件の内数かどうかは、明記されていません。
-- **公式URL**：[Quotas and limits](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)
-- **対処方法**：フォルダ単位で登録する限り、数件〜十数件なので対処は不要。ファイルを1つずつ個別に登録する運用だけ避ける。
+**ご相談したいこと**
 
-### 3. ファイルサイズ
+1. ServiceNow の KBA（最も重要な点です）
+   ServiceNow 側の改修が難しい状況は理解しました。改修を伴わない方法として、KBA の内容を SharePoint に複製し、エージェントにはそちらを参照させることを考えています（手作業、または ServiceNow の標準のエクスポート機能を使う想定です）。この運用に、ルール上の問題はありますでしょうか。ほかに推奨の方法や実績があれば、ご教示ください。
 
-- **制限内容**：7MB 未満。Agent の作成者が同じテナントの M365 Copilot ライセンスを持ち、テナント グラフ グラウンディングが ON なら 200MB まで。
-- **補足（公式記載）**：
-  - "For makers without the Microsoft 365 Copilot license in the same tenant as their agent, due to memory limitations, generative answers can only use SharePoint files that are under 7 MB. If a file is larger than 7 MB, consider splitting it into multiple smaller files."
-  - "For better search results from SharePoint and support of files up to 200 MB in size, use a Microsoft 365 Copilot license in the same tenant as your agent, and turn on tenant graph grounding with semantic search."
-  - 別のページには "SharePoint and Microsoft Copilot connectors support files up to 512 MB if they have PDF, PPTX, or DOCX extensions." とあり、200MB の記載と数値が合いません。
-- **公式URL**：[Quotas and limits](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas) / [Knowledge sources summary](https://learn.microsoft.com/en-us/microsoft-copilot-studio/knowledge-copilot-studio)
-- **対処方法**：棚卸しでファイルサイズも拾い、7MB 超のものに印を付ける。7MB 超のファイルで実機テストをして、New UI で制限がかかるか確かめる。かかる場合は、ファイルを分割するか画像を圧縮する。
+2. GitHub 上のドキュメント
+   GitHub でのマージ時に、ドキュメントを SharePoint へ自動で格納する方法を考えています。GitHub Actions から SharePoint へ書き込むには Entra のアプリ登録が必要になる想定ですが、申請は可能でしょうか。ほかに推奨の方法（M365 側の GitHub コネクタなど）があれば、ご教示ください。
 
-### 4. ファイルタイプ
+3. GitHub Copilot の併用
+   エンジニア向けに、GitHub Copilot から SharePoint を参照できる Work IQ（CLI・MCP サーバー）を試したいと考えています。テナントで利用できますでしょうか。この点を含めてご相談したいので、ご担当チームをご紹介いただけますと幸いです。
 
-- **制限内容**：読めるのは Word・PowerPoint・PDF と、モダン SharePoint ページ。Excel・OneNote・HTML・Markdown・画像ファイルは一覧にありません。
-- **補足（公式記載）**：
-  - "SharePoint sites containing the following file types can be used as knowledge sources: Word documents (DOC/DOCX), PowerPoint (PPT/PPTX), PDF files"
-  - "Only modern SharePoint pages are supported. However, modern pages containing SPFx components aren't supported."
-- **公式URL**：[Quotas and limits](https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-quotas)
-- **対処方法**：
-  - OneNote はツール（ワークフロー）で読む。
-  - 手順や FAQ が Excel にあるものは、Word か PDF に書き直す。
-  - HTML・Markdown は PDF に変換する。
-  - 画像だけの内容は、文章を補う。
-  - 対象外の形式は「公開」フォルダに置かない。
-
-**公式に記載が無いもの**：フォルダ配下のファイル数と、階層の深さの上限です。この2点と New UI への適用可否は、MS への問い合わせに加えるのがよいと思います。
+よろしくお願いいたします。
